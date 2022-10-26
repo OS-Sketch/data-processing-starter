@@ -1,0 +1,119 @@
+setup: |
+  echo "Alert: Make sure to create a virtual environment in a directory called venv."
+  echo "Reference: https://realpython.com/python-virtual-environments-a-primer/"
+  venv/bin/pip install schedule && venv/bin/pip install faker
+  echo "Done installing project dependencies!"
+---
+
+# Reminder for ^^^:
+# All commands executed in the setup block are done in a
+# one-by-one fashion from the current working directory. This means
+# that there is no history associated with running the commands and
+# thus multiple commands must be run in a single chain.
+
+# perform checks on a file
+- project/pylang/processor.py:
+    - description: Ensure that the processor.py file exists in project/pylang
+      check: ConfirmFileExists
+    - description: Complete all TODOs, remove the TODO markers, and rewrite comments for processor.py
+      check: MatchFileFragment
+      options:
+        fragment: TODO
+        count: 0
+        exact: true
+    - description: Use an import statement for the schedule package installed in virtual environment
+      check: MatchFileFragment
+      options:
+        fragment: import schedule
+        count: 1
+        exact: true
+    - description: Use an import statement for Faker constructor from the faker package
+      check: MatchFileFragment
+      options:
+        fragment: from faker import Faker
+        count: 1
+        exact: true
+    - description: Use the every() function provided by the schedule package
+      check: MatchFileFragment
+      options:
+        fragment: every(
+        count: 2
+        exact: false
+    - description: Use the seconds.do() function provided by the schedule package
+      check: MatchFileFragment
+      options:
+        fragment: seconds.do(
+        count: 2
+        exact: false
+    - description: Use the run_pending() function provided by the schedule package
+      check: MatchFileFragment
+      options:
+        fragment: run_pending(
+        count: 1
+        exact: false
+    - description: Create a sufficient number of docstring (i.e., multiple-line) comments in processor.py
+      check: CountMultipleLineComments
+      options:
+        language: "Python"
+        count: 3
+        exact: false
+    - description: Create a sufficient number of single-line comments in main.py
+      check: CountSingleLineComments
+      options:
+        language: "Python"
+        count: 10
+        exact: false
+
+# Note: These commands assume that a virtual environment was created with the name venv
+# and that it will contain a suitable Python binary and all of the dependencies in it
+# Reference: https://realpython.com/python-virtual-environments-a-primer/
+
+# run a command
+- description: Run the project/pylang/processor.py program and ensure it does not crash
+  command: venv/bin/python project/pylang/processor.py 2 3 5
+
+# run the program and confirm correct number of lines in the output
+- description: Run the project/pylang/processor.py program and ensure that it yields output
+  check: CountCommandOutput
+  options:
+    command: venv/bin/python project/pylang/processor.py 2 3 5
+    count: 11
+    exact: false
+
+# perform checks on a file
+- writing/reflection.md:
+    - description: Ensure that the reflection.md file exists in the writing/ directory
+      check: ConfirmFileExists
+    - description: Complete all TODOs, remove the TODO markers, and rewrite comments for the reflection
+      check: MatchFileFragment
+      options:
+        fragment: TODO
+        count: 0
+        exact: true
+    - description: Delete the 'Add Your Name Here' prompt in the reflection file
+      check: MatchFileFragment
+      options:
+        fragment: "Add Your Name Here"
+        count: 0
+        exact: true
+    - description: Write a minimum of 500 meaningful words in the reflection
+      check: CountFileWords
+      options:
+        count: 500
+        exact: false
+    - check: CountMarkdownTags
+      options:
+        tag: heading
+        count: 10
+        exact: false
+    - check: CountMarkdownTags
+      options:
+        tag: code_block
+        count: 3
+        exact: false
+
+# count number of commits in the GitHub repository
+- description: Have at least a specific minimum number of 10 commits in repository
+  check: CountCommits
+  options:
+    count: 10
